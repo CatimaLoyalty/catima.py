@@ -64,5 +64,6 @@ class Card:
 
         return parse_url.generate_url(data)
 
-def from_url(url):
-    return Card(**parse_url.split_url(url))
+    @staticmethod
+    def from_url(url):
+        return Card(**parse_url.split_url(url))
