@@ -1,0 +1,18 @@
+{
+    "AZTEC": "azteccode",
+    "CODABAR": "rationalizedCodabar",
+    "CODE_39": "code39",
+    "CODE_93": "code93",
+    "CODE_128": "code128",
+    "DATA_MATRIX": "datamatrix",
+    "EAN_8": "ean8",
+    "EAN_13": "ean13",
+    "ITF": "TODO",
+    "MAXICODE": "maxicode",
+    "PDF_417": "pdf417",
+    "QR_CODE": "qrcode",
+    "RSS_14": "databaromni",
+    "RSS_EXPANDED": "databarexpanded",
+    "UPC_A": "upca",
+    "UPC_E": "upce"
+}
