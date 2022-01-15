@@ -7,7 +7,7 @@
     "DATA_MATRIX": "datamatrix",
     "EAN_8": "ean8",
     "EAN_13": "ean13",
-    "ITF": "TODO",
+    "ITF": "interleaved2of5",
     "MAXICODE": "maxicode",
     "PDF_417": "pdf417",
     "QR_CODE": "qrcode",
