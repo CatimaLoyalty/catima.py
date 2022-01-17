@@ -1,4 +1,5 @@
 import parse_url
+import android_color
 
 class Card:
     def __init__(
@@ -13,12 +14,14 @@ class Card:
             expiry=None,
             headercolor=None,
             ):
-        # TODO: headercolor and expiry are currently ignored
+        # TODO: expiry is currently ignored
         self.store = store
         self.note = note
         self.cardid = cardid
         self.balance = balance
         self.balancetype = balancetype
+
+        self.headercolor = android_color.AndroidColor(headercolor)
 
         self._barcodeid = barcodeid
         self.barcodetype = barcodetype
