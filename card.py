@@ -1,7 +1,18 @@
 import parse_url
 
 class Card:
-    def __init__(self, store='', note='', cardid='', barcodeid=None, barcodetype=None, balance=None, balancetype=None, expiry=None, headercolor=None):
+    def __init__(
+            self,
+            store='',
+            note='',
+            cardid='',
+            barcodeid=None,
+            barcodetype=None,
+            balance=None,
+            balancetype=None,
+            expiry=None,
+            headercolor=None,
+            ):
         # TODO: headercolor and expiry are currently ignored
         self.store = store
         self.note = note
