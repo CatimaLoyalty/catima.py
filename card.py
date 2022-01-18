@@ -3,20 +3,21 @@ import android_color
 import datetime
 import pytz
 
+
 class Card:
     def __init__(
-            self,
-            store='',
-            note='',
-            cardid='',
-            barcodeid=None,
-            barcodetype=None,
-            balance=None,
-            balancetype=None,
-            expiry=-1,
-            headercolor=None,
-            starstatus=False,
-            ):
+        self,
+        store="",
+        note="",
+        cardid="",
+        barcodeid=None,
+        barcodetype=None,
+        balance=None,
+        balancetype=None,
+        expiry=-1,
+        headercolor=None,
+        starstatus=False,
+    ):
         self.store = store
         self.note = note
         self.cardid = cardid
@@ -24,14 +25,23 @@ class Card:
         self.balancetype = balancetype
         self.starstatus = starstatus
 
-        self.headercolor = None if headercolor is None else android_color.AndroidColor(int(headercolor))
+        self.headercolor = (
+            None
+            if headercolor is None
+            else android_color.AndroidColor(int(headercolor))
+        )
         if not expiry:
             expiry = -1
-        self._expiry_datetime = datetime.datetime.fromtimestamp(int(expiry), datetime.timezone.utc)
+        self._expiry_datetime = datetime.datetime.fromtimestamp(
+            int(expiry), datetime.timezone.utc
+        )
 
         self._barcodeid = barcodeid
         self.barcodetype = barcodetype
-        self._barcodeid_tracks_cardid = barcodeid in (None, '',)
+        self._barcodeid_tracks_cardid = barcodeid in (
+            None,
+            "",
+        )
 
     @property
     def has_barcode(self):
@@ -47,9 +57,8 @@ class Card:
             self._barcodeid = self.cardid
 
     barcodeid_tracks_cardid = property(
-            _get_barcodeid_tracks_cardid,
-            _set_barcodeid_tracks_cardid
-            )
+        _get_barcodeid_tracks_cardid, _set_barcodeid_tracks_cardid
+    )
 
     def _get_barcodeid(self):
         if self.barcodeid_tracks_cardid:
@@ -66,27 +75,27 @@ class Card:
     @property
     def url(self):
         data = {}
-        data['store'] = self.store
-        data['note'] = self.note
-        data['cardid'] = self.cardid
+        data["store"] = self.store
+        data["note"] = self.note
+        data["cardid"] = self.cardid
 
         if self.balance is not None:
-            data['balance'] = self.balance
+            data["balance"] = self.balance
 
         if self.balancetype is not None:
-            data['balancetype'] = self.balancetype
+            data["balancetype"] = self.balancetype
 
         if self.barcodetype is not None:
-            data['barcodetype'] = self.barcodetype
+            data["barcodetype"] = self.barcodetype
 
         if not self.barcodeid_tracks_cardid:
-            data['barcodeid'] = self.barcodeid
+            data["barcodeid"] = self.barcodeid
 
         if self.has_expiry:
-            data['expiry'] = str(self.expiry)
+            data["expiry"] = str(self.expiry)
 
         if self.headercolor is not None:
-            data['headercolor'] = str(self.headercolor)
+            data["headercolor"] = str(self.headercolor)
 
         return parse_url.generate_url(data)
 
@@ -94,10 +103,12 @@ class Card:
         if self.has_expiry:
             return int(self.expiry_datetime.timestamp())
         else:
-            raise AttributeError('card has no expiry date')
+            raise AttributeError("card has no expiry date")
 
     def _set_expiry(self, expiry):
-        self.expiry_datetime = datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc)
+        self.expiry_datetime = datetime.datetime.fromtimestamp(
+            expiry, datetime.timezone.utc
+        )
 
     def _del_expiry(self):
         self.expiry = -1
@@ -108,7 +119,7 @@ class Card:
         if self.has_expiry:
             return self._expiry_datetime
         else:
-            raise AttributeError('card has no expiry date')
+            raise AttributeError("card has no expiry date")
 
     def _set_expiry_datetime(self, expiry_datetime):
         try:
