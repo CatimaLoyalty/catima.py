@@ -23,7 +23,9 @@ class Card:
         self.balancetype = balancetype
 
         self.headercolor = None if headercolor is None else android_color.AndroidColor(int(headercolor))
-        self._expiry_datetime = datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc)
+        if not expiry:
+            expiry = -1
+        self._expiry_datetime = datetime.datetime.fromtimestamp(int(expiry), datetime.timezone.utc)
 
         self._barcodeid = barcodeid
         self.barcodetype = barcodetype
@@ -87,7 +89,10 @@ class Card:
         return parse_url.generate_url(data)
 
     def _get_expiry(self):
-        return int(self.expiry_datetime.timestamp())
+        if self.has_expiry:
+            return int(self.expiry_datetime.timestamp())
+        else:
+            raise AttributeError('card has no expiry date')
 
     def _set_expiry(self, expiry):
         self.expiry_datetime = datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc)
@@ -98,7 +103,10 @@ class Card:
     expiry = property(_get_expiry, _set_expiry, _del_expiry)
 
     def _get_expiry_datetime(self):
-        return self._expiry_datetime
+        if self.has_expiry:
+            return self._expiry_datetime
+        else:
+            raise AttributeError('card has no expiry date')
 
     def _set_expiry_datetime(self, expiry_datetime):
         try:
