@@ -15,12 +15,14 @@ class Card:
             balancetype=None,
             expiry=-1,
             headercolor=None,
+            starstatus=False,
             ):
         self.store = store
         self.note = note
         self.cardid = cardid
         self.balance = balance
         self.balancetype = balancetype
+        self.starstatus = starstatus
 
         self.headercolor = None if headercolor is None else android_color.AndroidColor(int(headercolor))
         if not expiry:
