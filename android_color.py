@@ -22,12 +22,12 @@ class AndroidColor(int):
         string_end = hex(self & 0xFFFFFF)[2:]
         return ' ' * (6 - len(string_end)) + string_end
 
-    @propery
+    @property
     def css_rgb_string(self):
         r, g, b = self.rgb_tuple
         return f'rgb({r}, {g}, {b})'
 
-    @propery
+    @property
     def css_rgba_string(self):
         r, g, b, a_raw = self.rgba_tuple
         a = a_raw / 0xFF # Android stores alpha as 0...255; CSS uses 0.0...1.0

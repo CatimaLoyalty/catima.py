@@ -1,5 +1,7 @@
 import parse_url
 import android_color
+import datetime
+import pytz
 
 class Card:
     def __init__(
@@ -11,17 +13,17 @@ class Card:
             barcodetype=None,
             balance=None,
             balancetype=None,
-            expiry=None,
+            expiry=-1,
             headercolor=None,
             ):
-        # TODO: expiry is currently ignored
         self.store = store
         self.note = note
         self.cardid = cardid
         self.balance = balance
         self.balancetype = balancetype
 
-        self.headercolor = android_color.AndroidColor(headercolor)
+        self.headercolor = None if headercolor is None else android_color.AndroidColor(int(headercolor))
+        self._expiry_datetime = datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc)
 
         self._barcodeid = barcodeid
         self.barcodetype = barcodetype
@@ -76,7 +78,39 @@ class Card:
         if not self.barcodeid_tracks_cardid:
             data['barcodeid'] = self.barcodeid
 
+        if self.has_expiry:
+            data['expiry'] = str(self.expiry)
+
+        if self.headercolor is not None:
+            data['headercolor'] = str(self.headercolor)
+
         return parse_url.generate_url(data)
+
+    def _get_expiry(self):
+        return int(self.expiry_datetime.timestamp())
+
+    def _set_expiry(self, expiry):
+        self.expiry_datetime = datetime.datetime.fromtimestamp(expiry, datetime.timezone.utc)
+
+    def _del_expiry(self):
+        self.expiry = -1
+
+    expiry = property(_get_expiry, _set_expiry, _del_expiry)
+
+    def _get_expiry_datetime(self):
+        return self._expiry_datetime
+
+    def _set_expiry_datetime(self, expiry_datetime):
+        try:
+            self._expiry_datetime = pytz.utc.localize(expiry_datetime)
+        except ValueError:
+            self._expiry_datetime = expiry_datetime.astimezone(datetime.timezone.utc)
+
+    expiry_datetime = property(_get_expiry_datetime, _set_expiry_datetime)
+
+    @property
+    def has_expiry(self):
+        return self.expiry != -1
 
     @staticmethod
     def from_url(url):
