@@ -1,66 +1,51 @@
-import parse_url
 import android_color
 import datetime
-import pytz
 
-
-class Card:
+class IndependentCard:
     def __init__(
         self,
-        store="",
-        note="",
-        cardid="",
-        barcodeid=None,
-        barcodetype=None,
-        balance=None,
-        balancetype=None,
-        expiry=-1,
-        headercolor=None,
-        starstatus=False,
+        store,
+        note,
+        cardid,
+        barcodeid="",
+        barcodetype="",
+        balance="",
+        balancetype="",
+        expiry="",
+        headercolor="",
     ):
         self.store = store
         self.note = note
         self.cardid = cardid
+
+        self.barcodeid = barcodeid
+        self.barcodetype = barcodetype
+
         self.balance = balance
         self.balancetype = balancetype
-        self.starstatus_bool = bool(starstatus)
 
-        self.headercolor = (
-            None
-            if headercolor is None
-            else android_color.AndroidColor(int(headercolor))
-        )
-        if not expiry:
-            expiry = -1
         self.expiry = expiry
 
-        self._expiry_datetime = datetime.datetime.fromtimestamp(
-            int(expiry), datetime.timezone.utc
-        )
-
-        self._barcodeid = barcodeid
-        self.barcodetype = barcodetype
-        self._barcodeid_tracks_cardid = barcodeid in (
-            None,
-            "",
-        )
+        self.headercolor = headercolor
 
     @property
     def has_barcode(self):
-        return self.barcodetype is not None
+        return self.barcodetype != ''
 
     def _get_barcodeid_tracks_cardid(self):
-        return self._barcodeid_tracks_cardid
+        return self._barcodeid == ''
 
-    def _set_barcodeid_tracks_cardid(self, value):
-        old = self._barcodeid_tracks_cardid
-        self._barcodeid_tracks_cardid = value
-        if value != old:
-            self._barcodeid = self.cardid
+    def _set_barcodeid_tracks_cardid(self, new):
+        new = bool(new)
+        if self.barcodeid_tracks_cardid == new:
+            return
+        
+        if new:
+            del self.barcodeid
+        else:
+            self.barcodeid = self.cardid
 
-    barcodeid_tracks_cardid = property(
-        _get_barcodeid_tracks_cardid, _set_barcodeid_tracks_cardid
-    )
+    barcodeid_tracks_cardid = property(_get_barcodeid_tracks_cardid, _set_barcodeid_tracks_cardid)
 
     def _get_barcodeid(self):
         if self.barcodeid_tracks_cardid:
@@ -68,99 +53,41 @@ class Card:
         else:
             return self._barcodeid
 
-    def _set_barcodeid(self, barcodeid):
-        self.barcodeid_tracks_cardid = False
-        self._barcodeid = barcodeid
+    def _set_barcodeid(self, new):
+        self._barcodeid = new
 
-    barcodeid = property(_get_barcodeid, _set_barcodeid)
+    def _del_barcodeid(self):
+        self._barcodeid = ''
 
-    def _get_expiry(self):
-        if self.has_expiry:
-            return int(self.expiry_datetime.timestamp())
+    barcodeid = property(_get_barcodeid, _set_barcodeid, _del_barcodeid)
+
+    @property
+    def has_balance(self):
+        return self._balance is not None
+
+    def _get_balance(self):
+        return self._balance
+
+    def _set_balance(self, new):
+        if new is None:
+            self._balance = None
         else:
-            raise AttributeError("card has no expiry date")
+            self._balance = float(new)
 
-    def _set_expiry(self, expiry):
-        self.expiry_datetime = datetime.datetime.fromtimestamp(
-            expiry, datetime.timezone.utc
-        )
+    def _del_balance(self):
+        self.balance = None
 
-    def _del_expiry(self):
-        self.expiry = -1
+    balance = property(_get_balance, _set_balance, _del_balance)
 
-    expiry = property(_get_expiry, _set_expiry, _del_expiry)
+    def _get_headercolor(self):
+        return android_color.AndroidColor(self._headercolor)
 
+    def _set_headercolor(self, new):
+        self._headercolor = android_color.AndroidColor(new)
+
+    headercolor = property(_get_headercolor, _set_headercolor)
+    
     def _get_expiry_datetime(self):
-        if self.has_expiry:
-            return self._expiry_datetime
-        else:
-            raise AttributeError("card has no expiry date")
+        return datetime.datetime.fromtimestamp(self.expiry, tz=datetime.timezone.utc)
 
-    def _set_expiry_datetime(self, expiry_datetime):
-        try:
-            self._expiry_datetime = pytz.utc.localize(expiry_datetime)
-        except ValueError:
-            self._expiry_datetime = expiry_datetime.astimezone(datetime.timezone.utc)
-
-    expiry_datetime = property(_get_expiry_datetime, _set_expiry_datetime)
-
-    def _get_starstatus(self):
-        return int(self.starstatus_bool)
-
-    def _set_starstatus(self, value):
-        self.starstatus_bool = bool(value)
-
-    starstatus = property(_get_starstatus, _set_starstatus)
-
-    @property
-    def has_expiry(self):
-        return self.expiry != -1
-
-    @staticmethod
-    def from_url(url):
-        return Card(**parse_url.split_url(url))
-
-    @property
-    def url(self):
-        data = {}
-        data["store"] = self.store
-        data["note"] = self.note
-        data["cardid"] = self.cardid
-
-        if self.balance is not None:
-            data["balance"] = self.balance
-
-        if self.balancetype is not None:
-            data["balancetype"] = self.balancetype
-
-        if self.barcodetype is not None:
-            data["barcodetype"] = self.barcodetype
-
-        if not self.barcodeid_tracks_cardid:
-            data["barcodeid"] = self.barcodeid
-
-        if self.has_expiry:
-            data["expiry"] = str(self.expiry)
-
-        if self.headercolor is not None:
-            data["headercolor"] = str(self.headercolor)
-
-        return parse_url.generate_url(data)
-
-    def csv_row(self, card_id):
-        data = [
-                str(card_id),
-                self.store,
-                self.note,
-                str(self.expiry) if self.has_expiry else '',
-                '' if self.balance is None else str(self.balance),
-                '' if self.balancetype is None else self.balancetype,
-                self.cardid,
-                '' if self.barcodeid_tracks_cardid else self.barcodeid,
-                self.barcodetype if self.has_barcode else '',
-                '' if self.headercolor is None else self.headercolor,
-                self.starstatus,
-                0,
-                ]
-
-        return data
+    expiry_datetime = property(_get_expiry_datetime)

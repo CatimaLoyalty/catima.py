@@ -72,7 +72,7 @@ def split_at_blank_lines(lines):
 
     if (
         line_groups[2][0]
-        != '_id,store,note,expiry,balance,balancetype,cardid,barcodeid,barcodetype,headercolor,starstatus,lastused'
+        != "_id,store,note,expiry,balance,balancetype,cardid,barcodeid,barcodetype,headercolor,starstatus,lastused"
     ):
         raise CatimaCSVSyntaxError("invalid table header for cards database")
 
@@ -90,15 +90,18 @@ def parse_csv(lines):
 
     return tables
 
+
 def quote(item):
-    if ',' in item or '"' in item:
+    if "," in item or '"' in item:
         item = item.replace('"', '""')
         return f'"{item}"'
     else:
         return item
 
+
 def quote_row(row):
-    return ','.join([quote(item) for item in row])
+    return ",".join([quote(item) for item in row])
+
 
 def generate_card_row(card, card_id=1):
     return quote_row(card.csv_row(card_id))
