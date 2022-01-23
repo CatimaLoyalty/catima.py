@@ -36,8 +36,29 @@ def split_url(url):
 
     return {k: v[0] for k, v in parsed_data.items()}
 
+def generate_url(card, base_url="https://catima.app/share/", query=False):
+    data = {}
+    data["store"] = card.store
+    data["note"] = card.note
+    data["cardid"] = card.cardid
 
-def generate_url(data, base_url="https://catima.app/share/", query=False):
+    if card.balance is not None:
+        data["balance"] = card.balance
+
+    if card.balancetype is not None:
+        data["balancetype"] = card.balancetype
+
+    if card.barcodetype is not None:
+        data["barcodetype"] = card.barcodetype
+
+    if not card.barcodeid_tracks_cardid:
+        data["barcodeid"] = card.barcodeid
+
+    if card.has_expiry:
+        data["expiry"] = str(card.expiry)
+
+    data["headercolor"] = str(card.headercolor)
+
     encoded_data = quote(urlencode(data))
     separator = "?" if query else "#"
     return f"{base_url}{separator}{encoded_data}"
