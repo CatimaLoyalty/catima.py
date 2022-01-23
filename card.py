@@ -23,7 +23,7 @@ class Card:
         self.cardid = cardid
         self.balance = balance
         self.balancetype = balancetype
-        self.starstatus = starstatus
+        self.starstatus_bool = bool(starstatus)
 
         self.headercolor = (
             None
@@ -32,6 +32,8 @@ class Card:
         )
         if not expiry:
             expiry = -1
+        self.expiry = expiry
+
         self._expiry_datetime = datetime.datetime.fromtimestamp(
             int(expiry), datetime.timezone.utc
         )
@@ -72,33 +74,6 @@ class Card:
 
     barcodeid = property(_get_barcodeid, _set_barcodeid)
 
-    @property
-    def url(self):
-        data = {}
-        data["store"] = self.store
-        data["note"] = self.note
-        data["cardid"] = self.cardid
-
-        if self.balance is not None:
-            data["balance"] = self.balance
-
-        if self.balancetype is not None:
-            data["balancetype"] = self.balancetype
-
-        if self.barcodetype is not None:
-            data["barcodetype"] = self.barcodetype
-
-        if not self.barcodeid_tracks_cardid:
-            data["barcodeid"] = self.barcodeid
-
-        if self.has_expiry:
-            data["expiry"] = str(self.expiry)
-
-        if self.headercolor is not None:
-            data["headercolor"] = str(self.headercolor)
-
-        return parse_url.generate_url(data)
-
     def _get_expiry(self):
         if self.has_expiry:
             return int(self.expiry_datetime.timestamp())
@@ -129,6 +104,14 @@ class Card:
 
     expiry_datetime = property(_get_expiry_datetime, _set_expiry_datetime)
 
+    def _get_starstatus(self):
+        return int(self.starstatus_bool)
+
+    def _set_starstatus(self, value):
+        self.starstatus_bool = bool(value)
+
+    starstatus = property(_get_starstatus, _set_starstatus)
+
     @property
     def has_expiry(self):
         return self.expiry != -1
@@ -136,3 +119,48 @@ class Card:
     @staticmethod
     def from_url(url):
         return Card(**parse_url.split_url(url))
+
+    @property
+    def url(self):
+        data = {}
+        data["store"] = self.store
+        data["note"] = self.note
+        data["cardid"] = self.cardid
+
+        if self.balance is not None:
+            data["balance"] = self.balance
+
+        if self.balancetype is not None:
+            data["balancetype"] = self.balancetype
+
+        if self.barcodetype is not None:
+            data["barcodetype"] = self.barcodetype
+
+        if not self.barcodeid_tracks_cardid:
+            data["barcodeid"] = self.barcodeid
+
+        if self.has_expiry:
+            data["expiry"] = str(self.expiry)
+
+        if self.headercolor is not None:
+            data["headercolor"] = str(self.headercolor)
+
+        return parse_url.generate_url(data)
+
+    def csv_row(self, card_id):
+        data = [
+                str(card_id),
+                self.store,
+                self.note,
+                str(self.expiry) if self.has_expiry else '',
+                '' if self.balance is None else str(self.balance),
+                '' if self.balancetype is None else self.balancetype,
+                self.cardid,
+                '' if self.barcodeid_tracks_cardid else self.barcodeid,
+                self.barcodetype if self.has_barcode else '',
+                '' if self.headercolor is None else self.headercolor,
+                self.starstatus,
+                0,
+                ]
+
+        return data
