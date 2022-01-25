@@ -21,6 +21,7 @@ class IndependentCard:
         balancetype="",
         expiry="",
         headercolor="",
+        starstatus="0",
     ):
         self.store = store
         self.note = note
@@ -41,6 +42,41 @@ class IndependentCard:
             self.headercolor = headercolor
         except ValueError:
             self.headercolor = 0xFF0000FF  # blue as an Android color
+
+        try:
+            self.starstatus = starstatus
+        except ValueError:
+            self.starstatus = "0"
+
+    def store_value(self, key, value):
+        print(key, value)
+
+    def _get_store(self):
+        return self._store
+
+    def _set_store(self, new):
+        self._store = str(new)
+        self.store_value('store', str(new))
+
+    store = property(_get_store, _set_store)
+
+    def _get_note(self):
+        return self._note
+
+    def _set_note(self, new):
+        self._note = str(new)
+        self.store_value('note', str(new))
+
+    note = property(_get_note, _set_note)
+
+    def _get_cardid(self):
+        return self._cardid
+
+    def _set_cardid(self, new):
+        self._cardid = str(new)
+        self.store_value('cardid', str(new))
+
+    cardid = property(_get_cardid, _set_cardid)
 
     @property
     def has_barcode(self):
@@ -70,10 +106,11 @@ class IndependentCard:
             return self._barcodeid
 
     def _set_barcodeid(self, new):
+        self.store_value('barcodeid', new)
         self._barcodeid = new
 
     def _del_barcodeid(self):
-        self._barcodeid = ""
+        self.barcodeid = ""
 
     barcodeid = property(_get_barcodeid, _set_barcodeid, _del_barcodeid)
 
@@ -87,8 +124,10 @@ class IndependentCard:
     def _set_balance(self, new):
         if new is None or new == "":
             self._balance = None
+            self.store_value('balance', '')
         else:
             self._balance = float(new)
+            self.store_value('balance', str(float(new)))
 
     def _del_balance(self):
         self.balance = None
@@ -99,6 +138,7 @@ class IndependentCard:
         return android_color.AndroidColor(self._headercolor)
 
     def _set_headercolor(self, new):
+        self.store_value('headercolor', str(int(new)))
         self._headercolor = android_color.AndroidColor(new)
 
     headercolor = property(_get_headercolor, _set_headercolor)
@@ -113,8 +153,10 @@ class IndependentCard:
     def _set_expiry(self, new):
         if new is None:
             self._expiry = None
+            self.store_value('expiry', '')
         else:
             self._expiry = int(new)
+            self.store_value('expiry', str(int(new)))
 
     def _del_expiry(self):
         self.expiry = None
@@ -125,3 +167,19 @@ class IndependentCard:
         return datetime.datetime.fromtimestamp(self.expiry, tz=datetime.timezone.utc)
 
     expiry_datetime = property(_get_expiry_datetime)
+
+    def _get_starstatus(self):
+        return self._starstatus
+
+    def _set_starstatus(self, new):
+        self._starstatus = str(int(bool(int(new))))
+        self.store_value('starstatus', str(int(bool(int(new)))))
+
+    starstatus = property(_get_starstatus, _set_starstatus)
+
+    def _get_starstatus_bool(self):
+        return bool(int(self.starstatus))
+
+    # No need for _set_starstatus_bool because _set_starstatus can handle bool
+
+    starstatus_bool = property(_get_starstatus_bool, _set_starstatus)
